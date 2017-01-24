@@ -2,6 +2,7 @@ package $organization$.$name;format="camel"$stream.impl
 
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.server._
+import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import $organization$.$name;format="camel"$stream.api.$name;format="Camel"$StreamService
 import $organization$.$name;format="camel"$.api.$name;format="Camel"$Service

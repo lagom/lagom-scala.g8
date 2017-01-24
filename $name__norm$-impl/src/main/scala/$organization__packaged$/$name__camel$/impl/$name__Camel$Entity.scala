@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import akka.Done
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
-import com.lightbend.lagom.scaladsl.playjson.{Jsonable, SerializerRegistry, Serializers}
+import com.lightbend.lagom.scaladsl.playjson.{JsonSerializerRegistry, JsonSerializer}
 import play.api.libs.json.{Format, Json}
 
 import scala.collection.immutable.Seq
@@ -52,10 +52,11 @@ class $name;format="Camel"$Entity extends PersistentEntity {
         // In response to this command, we want to first persist it as a
         // GreetingMessageChanged event
         ctx.thenPersist(
-          GreetingMessageChanged(newMessage),
+          GreetingMessageChanged(newMessage)
+        ) { _ =>
           // Then once the event is successfully persisted, we respond with done.
-          _ => ctx.reply(Done)
-        )
+          ctx.reply(Done)
+        }
 
     }.onReadOnlyCommand[Hello, String] {
 
@@ -80,7 +81,7 @@ class $name;format="Camel"$Entity extends PersistentEntity {
 /**
   * The current state held by the persistent entity.
   */
-case class $name;format="Camel"$State(message: String, timestamp: String) extends Jsonable
+case class $name;format="Camel"$State(message: String, timestamp: String)
 
 object $name;format="Camel"$State {
   /**
@@ -98,7 +99,7 @@ object $name;format="Camel"$State {
 /**
   * This interface defines all the events that the $name;format="Camel"$Entity supports.
   */
-sealed trait $name;format="Camel"$Event extends Jsonable
+sealed trait $name;format="Camel"$Event
 
 /**
   * An event that represents a change in greeting message.
@@ -119,7 +120,7 @@ object GreetingMessageChanged {
 /**
   * This interface defines all the commands that the HelloWorld entity supports.
   */
-sealed trait $name;format="Camel"$Command[R] extends Jsonable with ReplyType[R]
+sealed trait $name;format="Camel"$Command[R] extends ReplyType[R]
 
 /**
   * A command to switch the greeting message.
@@ -165,11 +166,20 @@ object Hello {
   implicit val format: Format[Hello] = Json.format
 }
 
-class $name;format="Camel"$SerializerRegistry extends SerializerRegistry {
-  override def serializers: Seq[Serializers[_]] = Seq(
-    Serializers[UseGreetingMessage],
-    Serializers[Hello],
-    Serializers[GreetingMessageChanged],
-    Serializers[$name;format="Camel"$State]
+/**
+  * Akka serialization, used by both persistence and remoting, needs to have
+  * serializers registered for every type serialized or deserialized. While it's
+  * possible to use any serializer you want for Akka messages, out of the box
+  * Lagom provides support for JSON, via this registry abstraction.
+  *
+  * The serializers are registered here, and then provided to Lagom in the
+  * application loader.
+  */
+object $name;format="Camel"$SerializerRegistry extends JsonSerializerRegistry {
+  override def serializers: Seq[JsonSerializer[_]] = Seq(
+    JsonSerializer[UseGreetingMessage],
+    JsonSerializer[Hello],
+    JsonSerializer[GreetingMessageChanged],
+    JsonSerializer[$name;format="Camel"$State]
   )
 }

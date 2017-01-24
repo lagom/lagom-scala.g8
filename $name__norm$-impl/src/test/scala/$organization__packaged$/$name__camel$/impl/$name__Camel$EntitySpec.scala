@@ -3,11 +3,13 @@ package $organization$.$name;format="camel"$.impl
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import com.lightbend.lagom.scaladsl.testkit.PersistentEntityTestDriver
+import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
 class $name;format="Camel"$EntitySpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
-  private val system = ActorSystem("$name;format="Camel"$EntitySpec")
+  private val system = ActorSystem("$name;format="Camel"$EntitySpec",
+    JsonSerializerRegistry.actorSystemSetupFor($name;format="Camel"$SerializerRegistry))
 
   override protected def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)

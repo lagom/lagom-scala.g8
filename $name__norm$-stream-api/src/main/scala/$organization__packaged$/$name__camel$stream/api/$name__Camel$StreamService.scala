@@ -1,5 +1,6 @@
 package $organization$.$name;format="camel"$stream.api
 
+import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
 
@@ -11,7 +12,7 @@ import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
   */
 trait $name;format="Camel"$StreamService extends Service {
 
-  def stream: ServiceCall[Source[String, _], Source[String, _]]
+  def stream: ServiceCall[Source[String, NotUsed], Source[String, NotUsed]]
 
   override final def descriptor = {
     import Service._

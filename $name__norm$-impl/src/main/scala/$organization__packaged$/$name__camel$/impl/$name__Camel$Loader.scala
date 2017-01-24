@@ -4,6 +4,7 @@ import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.server._
+import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import $organization$.$name;format="camel"$.api.$name;format="Camel"$Service
 import com.softwaremill.macwire._
@@ -28,6 +29,9 @@ abstract class $name;format="Camel"$Application(context: LagomApplicationContext
   override lazy val lagomServer = LagomServer.forServices(
     bindService[$name;format="Camel"$Service].to(wire[$name;format="Camel"$ServiceImpl])
   )
+
+  // Register the JSON serializer registry
+  override lazy val jsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
 
   // Register the $name$ persistent entity
   persistentEntityRegistry.register(wire[$name;format="Camel"$Entity])
