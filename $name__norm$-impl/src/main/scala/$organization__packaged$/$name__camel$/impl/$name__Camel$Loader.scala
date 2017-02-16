@@ -18,6 +18,10 @@ class $name;format="Camel"$Loader extends LagomApplicationLoader {
 
   override def loadDevMode(context: LagomApplicationContext): LagomApplication =
     new $name;format="Camel"$Application(context) with LagomDevModeComponents
+
+  override def describeServices = List(
+    readDescriptor[$name;format="Camel"$Service]
+  )
 }
 
 abstract class $name;format="Camel"$Application(context: LagomApplicationContext)
