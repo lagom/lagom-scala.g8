@@ -1,8 +1,5 @@
 package $organization$.$name;format="camel"$.impl
 
-import java.io.File
-
-import akka.cluster.Cluster
 import com.lightbend.lagom.scaladsl.server.LocalServiceLocator
 import com.lightbend.lagom.scaladsl.testkit.ServiceTest
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
