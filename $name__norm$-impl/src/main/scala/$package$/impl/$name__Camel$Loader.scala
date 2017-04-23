@@ -1,4 +1,4 @@
-package $organization$.$name;format="camel"$.impl
+package $package$.impl
 
 import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
@@ -6,7 +6,7 @@ import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceCo
 import com.lightbend.lagom.scaladsl.server._
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
-import $organization$.$name;format="camel"$.api.$name;format="Camel"$Service
+import $package$.api.$name;format="Camel"$Service
 import com.softwaremill.macwire._
 
 class $name;format="Camel"$Loader extends LagomApplicationLoader {

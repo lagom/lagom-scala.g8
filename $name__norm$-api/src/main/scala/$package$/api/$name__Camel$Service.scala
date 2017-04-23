@@ -1,4 +1,4 @@
-package $organization$.$name;format="camel"$.api
+package $package$.api
 
 import akka.{Done, NotUsed}
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}

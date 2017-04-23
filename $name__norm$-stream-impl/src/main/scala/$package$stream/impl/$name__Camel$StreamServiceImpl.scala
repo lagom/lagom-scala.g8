@@ -1,8 +1,8 @@
-package $organization$.$name;format="camel"$stream.impl
+package $package$stream.impl
 
 import com.lightbend.lagom.scaladsl.api.ServiceCall
-import $organization$.$name;format="camel"$stream.api.$name;format="Camel"$StreamService
-import $organization$.$name;format="camel"$.api.$name;format="Camel"$Service
+import $package$stream.api.$name;format="Camel"$StreamService
+import $package$.api.$name;format="Camel"$Service
 
 import scala.concurrent.Future
 

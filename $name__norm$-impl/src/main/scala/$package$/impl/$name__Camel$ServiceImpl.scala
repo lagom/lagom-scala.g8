@@ -1,8 +1,8 @@
-package $organization$.$name;format="camel"$.impl
+package $package$.impl
 
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
-import $organization$.$name;format="camel"$.api.$name;format="Camel"$Service
+import $package$.api.$name;format="Camel"$Service
 
 /**
   * Implementation of the $name;format="Camel"$Service.
