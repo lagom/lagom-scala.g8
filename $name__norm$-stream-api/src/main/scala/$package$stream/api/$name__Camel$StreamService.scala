@@ -1,4 +1,4 @@
-package $organization$.$name;format="camel"$stream.api
+package $package$stream.api
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source

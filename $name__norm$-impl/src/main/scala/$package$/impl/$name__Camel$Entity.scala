@@ -1,4 +1,4 @@
-package $organization$.$name;format="camel"$.impl
+package $package$.impl
 
 import java.time.LocalDateTime
 

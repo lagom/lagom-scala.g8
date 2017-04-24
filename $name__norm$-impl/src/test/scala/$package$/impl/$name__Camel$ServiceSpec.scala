@@ -1,9 +1,9 @@
-package $organization$.$name;format="camel"$.impl
+package $package$.impl
 
 import com.lightbend.lagom.scaladsl.server.LocalServiceLocator
 import com.lightbend.lagom.scaladsl.testkit.ServiceTest
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
-import $organization$.$name;format="camel"$.api._
+import $package$.api._
 
 class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 

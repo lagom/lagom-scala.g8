@@ -1,4 +1,4 @@
-package $organization$.$name;format="camel"$.impl
+package $package$.impl
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
