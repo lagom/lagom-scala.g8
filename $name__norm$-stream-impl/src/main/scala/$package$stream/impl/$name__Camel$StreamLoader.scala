@@ -27,10 +27,8 @@ abstract class $name;format="Camel"$StreamApplication(context: LagomApplicationC
   extends LagomApplication(context)
     with AhcWSComponents {
 
-  // Bind the services that this server provides
-  override lazy val lagomServer = LagomServer.forServices(
-    bindService[$name;format="Camel"$StreamService].to(wire[$name;format="Camel"$StreamServiceImpl])
-  )
+  // Bind the service that this server provides
+  override lazy val lagomServer = serverFor[$name;format="Camel"$StreamService](wire[$name;format="Camel"$StreamServiceImpl])
 
   // Bind the $name;format="Camel"$Service client
   lazy val $name;format="camel"$Service = serviceClient.implement[$name;format="Camel"$Service]
