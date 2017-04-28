@@ -29,10 +29,8 @@ abstract class $name;format="Camel"$Application(context: LagomApplicationContext
     with CassandraPersistenceComponents
     with AhcWSComponents {
 
-  // Bind the services that this server provides
-  override lazy val lagomServer = LagomServer.forServices(
-    bindService[$name;format="Camel"$Service].to(wire[$name;format="Camel"$ServiceImpl])
-  )
+  // Bind the service that this server provides
+  override lazy val lagomServer = serverFor[$name;format="Camel"$Service](wire[$name;format="Camel"$ServiceImpl])
 
   // Register the JSON serializer registry
   override lazy val jsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
