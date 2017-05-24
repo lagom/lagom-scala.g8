@@ -3,9 +3,9 @@ package $package$.impl
 import java.time.LocalDateTime
 
 import akka.Done
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
+import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
-import com.lightbend.lagom.scaladsl.playjson.{JsonSerializerRegistry, JsonSerializer}
+import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
 import play.api.libs.json.{Format, Json}
 
 import scala.collection.immutable.Seq
@@ -61,7 +61,7 @@ class $name;format="Camel"$Entity extends PersistentEntity {
     }.onReadOnlyCommand[Hello, String] {
 
       // Command handler for the Hello command
-      case (Hello(name, organization), ctx, state) =>
+      case (Hello(name), ctx, state) =>
         // Reply with a message built from the current message, and the name of
         // the person we're meant to say hello to.
         ctx.reply(s"\$message, \$name!")
@@ -99,7 +99,13 @@ object $name;format="Camel"$State {
 /**
   * This interface defines all the events that the $name;format="Camel"$Entity supports.
   */
-sealed trait $name;format="Camel"$Event
+sealed trait $name;format="Camel"$Event extends AggregateEvent[$name;format="Camel"$Event] {
+  def aggregateTag = $name;format="Camel"$Event.Tag
+}
+
+object $name;format="Camel"$Event {
+  val Tag = AggregateEventTag[$name;format="Camel"$Event]
+}
 
 /**
   * An event that represents a change in greeting message.
@@ -150,7 +156,7 @@ object UseGreetingMessage {
   * The reply type is String, and will contain the message to say to that
   * person.
   */
-case class Hello(name: String, organization: Option[String]) extends $name;format="Camel"$Command[String]
+case class Hello(name: String) extends $name;format="Camel"$Command[String]
 
 object Hello {
 

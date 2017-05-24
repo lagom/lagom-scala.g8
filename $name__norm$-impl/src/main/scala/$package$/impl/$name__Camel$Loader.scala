@@ -7,6 +7,7 @@ import com.lightbend.lagom.scaladsl.server._
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import $package$.api.$name;format="Camel"$Service
+import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.softwaremill.macwire._
 
 class $name;format="Camel"$Loader extends LagomApplicationLoader {
@@ -27,6 +28,7 @@ class $name;format="Camel"$Loader extends LagomApplicationLoader {
 abstract class $name;format="Camel"$Application(context: LagomApplicationContext)
   extends LagomApplication(context)
     with CassandraPersistenceComponents
+    with LagomKafkaComponents
     with AhcWSComponents {
 
   // Bind the service that this server provides
