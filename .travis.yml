@@ -4,9 +4,9 @@ jdk: oraclejdk8
 env:
   matrix:
     # Test with the defaults
-    - SCRIPT="sbt new file://$(pwd) --name=hello --lagom_version=1.3.4 && cd hello && sbt test"
+    - SCRIPT="sbt new file://$(pwd) --name=hello && cd hello && sbt test"
     # Test with custom name/organization to ensure templating is done correctly
-    - SCRIPT="sbt new file://$(pwd) --name=smello --lagom_version=1.3.4 --organization=org.eggsample && cd smello && sbt test"
+    - SCRIPT="sbt new file://$(pwd) --name=smello --organization=org.eggsample && cd smello && sbt test"
 script: eval $SCRIPT
 cache:
   directories:
@@ -21,3 +21,4 @@ notifications:
         - https://webhooks.gitter.im/e/773aba95141768c32dae
     on_success: always
     on_failure: always
+    
