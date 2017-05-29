@@ -33,7 +33,7 @@ trait $name;format="Camel"$Service extends Service {
   /**
     * This gets published to Kafka.
     */
-  def greetingsTopic(): Topic[GreetingMessage]
+  def greetingsTopic(): Topic[GreetingMessageChanged]
 
   override final def descriptor = {
     import Service._
@@ -52,7 +52,7 @@ trait $name;format="Camel"$Service extends Service {
           // name as the partition key.
           .addProperty(
             KafkaProperties.partitionKeyStrategy,
-            PartitionKeyStrategy[GreetingMessage](_.name)
+            PartitionKeyStrategy[GreetingMessageChanged](_.name)
           )
       )
       .withAutoAcl(true)
@@ -72,4 +72,21 @@ object GreetingMessage {
     * This will be picked up by a Lagom implicit conversion from Play's JSON format to Lagom's message serializer.
     */
   implicit val format: Format[GreetingMessage] = Json.format[GreetingMessage]
+}
+
+
+
+/**
+  * The greeting message class used by the topic stream.
+  * Different than [[GreetingMessage]], this message includes the name (id).
+  */
+case class GreetingMessageChanged(name: String, message: String)
+
+object GreetingMessageChanged {
+  /**
+    * Format for converting greeting messages to and from JSON.
+    *
+    * This will be picked up by a Lagom implicit conversion from Play's JSON format to Lagom's message serializer.
+    */
+  implicit val format: Format[GreetingMessageChanged] = Json.format[GreetingMessageChanged]
 }

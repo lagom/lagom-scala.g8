@@ -1,11 +1,11 @@
 package $package$.impl
 
-import $package$.api.{$name;format="Camel"$Service, GreetingMessage}
-
+import $package$.api
+import $package$.api.{$name;format="Camel"$Service}
 import com.lightbend.lagom.scaladsl.api.ServiceCall
-import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.broker.TopicProducer
+import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
 
 /**
   * Implementation of the $name;format="Camel"$Service.
@@ -29,16 +29,16 @@ class $name;format="Camel"$ServiceImpl(persistentEntityRegistry: PersistentEntit
   }
 
 
-  override def greetingsTopic(): Topic[GreetingMessage] =
+  override def greetingsTopic(): Topic[api.GreetingMessageChanged] =
     TopicProducer.singleStreamWithOffset {
       fromOffset =>
         persistentEntityRegistry.eventStream($name;format="Camel"$Event.Tag, fromOffset)
           .map(ev => (convertEvent(ev), ev.offset))
     }
 
-  private def convertEvent(helloEvent: EventStreamElement[$name;format="Camel"$Event]): GreetingMessage = {
+  private def convertEvent(helloEvent: EventStreamElement[$name;format="Camel"$Event]): api.GreetingMessageChanged = {
     helloEvent.event match {
-      case GreetingMessageChanged(msg) => GreetingMessage(helloEvent.entityId, msg)
+      case GreetingMessageChanged(msg) => api.GreetingMessageChanged(helloEvent.entityId, msg)
     }
   }
 }
