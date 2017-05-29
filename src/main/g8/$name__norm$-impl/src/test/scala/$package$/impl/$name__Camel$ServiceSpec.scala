@@ -13,7 +13,7 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
   ) { ctx =>
     new $name;format="Camel"$Application(ctx) with LocalServiceLocator
   }
-  
+
   val client = server.serviceClient.implement[$name;format="Camel"$Service]
 
   override protected def afterAll() = server.stop()
@@ -28,7 +28,7 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
 
     "allow responding with a custom message" in {
       for {
-        _ <- client.useGreeting("Bob").invoke(GreetingMessage("Hi"))
+        _ <- client.useGreeting("Bob").invoke(GreetingMessage("Bob", "Hi"))
         answer <- client.hello("Bob").invoke()
       } yield {
         answer should ===("Hi, Bob!")

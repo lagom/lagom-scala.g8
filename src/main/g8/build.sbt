@@ -22,6 +22,7 @@ lazy val `$name;format="norm"$-impl` = (project in file("$name;format="norm"$-im
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslPersistenceCassandra,
+      lagomScaladslKafkaBroker,
       lagomScaladslTestKit,
       macwire,
       scalaTest
@@ -47,4 +48,3 @@ lazy val `$name;format="norm"$-stream-impl` = (project in file("$name;format="no
     )
   )
   .dependsOn(`$name;format="norm"$-stream-api`, `$name;format="norm"$-api`)
-
