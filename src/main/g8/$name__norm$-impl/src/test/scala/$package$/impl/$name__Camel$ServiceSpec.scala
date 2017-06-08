@@ -28,7 +28,7 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
 
     "allow responding with a custom message" in {
       for {
-        _ <- client.useGreeting("Bob").invoke(GreetingMessage("Bob", "Hi"))
+        _ <- client.useGreeting("Bob").invoke(GreetingMessage("Hi"))
         answer <- client.hello("Bob").invoke()
       } yield {
         answer should ===("Hi, Bob!")

@@ -63,7 +63,7 @@ trait $name;format="Camel"$Service extends Service {
 /**
   * The greeting message class.
   */
-case class GreetingMessage(name: String, message: String)
+case class GreetingMessage(message: String)
 
 object GreetingMessage {
   /**
