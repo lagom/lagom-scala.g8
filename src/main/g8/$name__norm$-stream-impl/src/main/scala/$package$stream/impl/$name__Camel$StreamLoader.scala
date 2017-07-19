@@ -18,9 +18,7 @@ class $name;format="Camel"$StreamLoader extends LagomApplicationLoader {
   override def loadDevMode(context: LagomApplicationContext): LagomApplication =
     new $name;format="Camel"$StreamApplication(context) with LagomDevModeComponents
   
-  override def describeServices = List(
-    readDescriptor[$name;format="Camel"$StreamService]
-  )
+  override def describeService = Some(readDescriptor[$name;format="Camel"$StreamService])
 }
 
 abstract class $name;format="Camel"$StreamApplication(context: LagomApplicationContext)
