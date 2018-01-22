@@ -9,7 +9,7 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
 
   private val server = ServiceTest.startServer(
     ServiceTest.defaultSetup
-      .withCassandra(true)
+      .withCassandra()
   ) { ctx =>
     new $name;format="Camel"$Application(ctx) with LocalServiceLocator
   }
