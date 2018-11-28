@@ -124,7 +124,7 @@ object GreetingMessageChanged {
 }
 
 /**
-  * This interface defines all the commands that the HelloWorld entity supports.
+  * This interface defines all the commands that the $name;format="Camel"$Entity supports.
   */
 sealed trait $name;format="Camel"$Command[R] extends ReplyType[R]
 
