@@ -1,7 +1,7 @@
 package $package$.impl
 
 import $package$.api
-import $package$.api.{$name;format="Camel"$Service}
+import $package$.api.$name;format="Camel"$Service
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.broker.TopicProducer

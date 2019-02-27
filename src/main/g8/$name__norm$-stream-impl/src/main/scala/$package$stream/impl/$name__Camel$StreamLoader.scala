@@ -12,12 +12,12 @@ class $name;format="Camel"$StreamLoader extends LagomApplicationLoader {
 
   override def load(context: LagomApplicationContext): LagomApplication =
     new $name;format="Camel"$StreamApplication(context) {
-      override def serviceLocator = NoServiceLocator
+      override def serviceLocator: NoServiceLocator.type = NoServiceLocator
     }
 
   override def loadDevMode(context: LagomApplicationContext): LagomApplication =
     new $name;format="Camel"$StreamApplication(context) with LagomDevModeComponents
-  
+
   override def describeService = Some(readDescriptor[$name;format="Camel"$StreamService])
 }
 
@@ -26,8 +26,8 @@ abstract class $name;format="Camel"$StreamApplication(context: LagomApplicationC
     with AhcWSComponents {
 
   // Bind the service that this server provides
-  override lazy val lagomServer = serverFor[$name;format="Camel"$StreamService](wire[$name;format="Camel"$StreamServiceImpl])
+  override lazy val lagomServer: LagomServer = serverFor[$name;format="Camel"$StreamService](wire[$name;format="Camel"$StreamServiceImpl])
 
   // Bind the $name;format="Camel"$Service client
-  lazy val $name;format="camel"$Service = serviceClient.implement[$name;format="Camel"$Service]
+  lazy val $name;format="camel"$Service: $name;format="Camel"$Service = serviceClient.implement[$name;format="Camel"$Service]
 }

@@ -8,6 +8,7 @@ import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import $package$.api.$name;format="Camel"$Service
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
+import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
 import com.softwaremill.macwire._
 
 class $name;format="Camel"$Loader extends LagomApplicationLoader {
@@ -30,10 +31,10 @@ abstract class $name;format="Camel"$Application(context: LagomApplicationContext
     with AhcWSComponents {
 
   // Bind the service that this server provides
-  override lazy val lagomServer = serverFor[$name;format="Camel"$Service](wire[$name;format="Camel"$ServiceImpl])
+  override lazy val lagomServer: LagomServer = serverFor[$name;format="Camel"$Service](wire[$name;format="Camel"$ServiceImpl])
 
   // Register the JSON serializer registry
-  override lazy val jsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
+  override lazy val jsonSerializerRegistry: JsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
 
   // Register the $name$ persistent entity
   persistentEntityRegistry.register(wire[$name;format="Camel"$Entity])

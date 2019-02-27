@@ -14,9 +14,9 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
     new $name;format="Camel"$Application(ctx) with LocalServiceLocator
   }
 
-  val client = server.serviceClient.implement[$name;format="Camel"$Service]
+  val client: $name;format="Camel"$Service = server.serviceClient.implement[$name;format="Camel"$Service]
 
-  override protected def afterAll() = server.stop()
+  override protected def afterAll(): Unit = server.stop()
 
   "$name$ service" should {
 

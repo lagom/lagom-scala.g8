@@ -100,11 +100,11 @@ object $name;format="Camel"$State {
   * This interface defines all the events that the $name;format="Camel"$Entity supports.
   */
 sealed trait $name;format="Camel"$Event extends AggregateEvent[$name;format="Camel"$Event] {
-  def aggregateTag = $name;format="Camel"$Event.Tag
+  def aggregateTag: AggregateEventTag[$name;format="Camel"$Event] = $name;format="Camel"$Event.Tag
 }
 
 object $name;format="Camel"$Event {
-  val Tag = AggregateEventTag[$name;format="Camel"$Event]
+  val Tag: AggregateEventTag[$name;format="Camel"$Event] = AggregateEventTag[$name;format="Camel"$Event]
 }
 
 /**
