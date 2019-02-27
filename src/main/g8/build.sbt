@@ -28,7 +28,7 @@ lazy val `$name;format="norm"$-impl` = (project in file("$name;format="norm"$-im
       scalaTest
     )
   )
-  .settings(lagomForkedTestSettings: _*)
+  .settings(lagomForkedTestSettings)
   .dependsOn(`$name;format="norm"$-api`)
 
 lazy val `$name;format="norm"$-stream-api` = (project in file("$name;format="norm"$-stream-api"))
