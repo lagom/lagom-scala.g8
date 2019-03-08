@@ -7,7 +7,7 @@ env:
     - SCRIPT="sbt new file://$(pwd) '--name=Hello World' && cd hello-world && sbt test"
     # Test with custom name/organization to ensure templating is done correctly
     - SCRIPT="sbt new file://$(pwd) --name=smello --organization=org.eggsample && cd smello && sbt test"
-script: eval $SCRIPT
+script: eval "$SCRIPT"
 cache:
   directories:
     - $HOME/.ivy2/cache
