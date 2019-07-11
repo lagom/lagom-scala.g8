@@ -1,20 +1,43 @@
 language: scala
-sudo: false
-jdk: oraclejdk8
+
 env:
+  global:
+    - JABBA_HOME=$HOME/.jabba
   matrix:
-    # Test with the defaults
-    - SCRIPT="sbt new file://$(pwd) --name=hello && cd hello && sbt test"
+    - TRAVIS_JDK=8
+    - TRAVIS_JDK=11
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: TRAVIS_JDK=11
+
+before_install:
+  - curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash && . ~/.jabba/jabba.sh
+
+install:
+  # Using ~ makes jabba installs the latest version for that major JDK release
+  - $JABBA_HOME/bin/jabba install "adopt@~1.${TRAVIS_JDK}.0-0"
+  - unset _JAVA_OPTIONS
+  # Using ~ with ls works in a similar way to jabba install described above
+  - export JAVA_HOME="$JABBA_HOME/jdk/$(jabba ls "adopt@~1.${TRAVIS_JDK}.0-0" | head -1)" && export PATH="$JAVA_HOME/bin:$PATH" && java -Xmx32m -version
+
+script:
+  # Test with the defaults
+  - sbt new file://$(pwd) --name=hello && pushd hello && sbt test && popd
     # Test with custom name/organization to ensure templating is done correctly
-    - SCRIPT="sbt new file://$(pwd) --name=smello --organization=org.eggsample && cd smello && sbt test"
-script: eval $SCRIPT
+  - sbt new file://$(pwd) --name=smello --organization=org.eggsample && cd smello && sbt test
+
 cache:
   directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/scala*
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
+    - "$HOME/.jabba/jdk"
+
 before_cache:
   # Delete all ivydata files since ivy touches them on each build
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
+
 notifications:
   webhooks:
     urls:
