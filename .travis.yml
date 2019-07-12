@@ -1,32 +1,23 @@
 language: scala
 
 env:
-  global:
-    - JABBA_HOME=$HOME/.jabba
-  matrix:
-    - TRAVIS_JDK=8
-    - TRAVIS_JDK=11
+  - TRAVIS_JDK=8
+  - TRAVIS_JDK=11
 
 matrix:
   fast_finish: true
   allow_failures:
     - env: TRAVIS_JDK=11
 
-before_install:
-  - curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash && . ~/.jabba/jabba.sh
-
-install:
-  # Using ~ makes jabba installs the latest version for that major JDK release
-  - $JABBA_HOME/bin/jabba install "adopt@~1.${TRAVIS_JDK}.0-0"
-  - unset _JAVA_OPTIONS
-  # Using ~ with ls works in a similar way to jabba install described above
-  - export JAVA_HOME="$JABBA_HOME/jdk/$(jabba ls "adopt@~1.${TRAVIS_JDK}.0-0" | head -1)" && export PATH="$JAVA_HOME/bin:$PATH" && java -Xmx32m -version
+# Install Jabba and use it with ~ to install the latest (minor) version of the given JDK release
+before_install: curl -Ls https://git.io/jabba | bash && . ~/.jabba/jabba.sh
+install: jabba install "adopt@~1.$TRAVIS_JDK.0-0" && jabba use "$_" && java -Xmx32m -version
 
 script:
-  # Test with the defaults
-  - sbt new file://$(pwd) --name=hello && pushd hello && sbt test && popd
+    # Test with the defaults
+  - sbt new file://$PWD --name=hello && pushd hello && sbt test && popd || travis_terminate 1
     # Test with custom name/organization to ensure templating is done correctly
-  - sbt new file://$(pwd) --name=smello --organization=org.eggsample && cd smello && sbt test
+  - sbt new file://$PWD --name=smello --organization=org.eggsample && pushd smello && sbt test && popd || travis_terminate 1
 
 cache:
   directories:
@@ -34,14 +25,4 @@ cache:
     - "$HOME/.sbt"
     - "$HOME/.jabba/jdk"
 
-before_cache:
-  # Delete all ivydata files since ivy touches them on each build
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
-
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/2aa0aeda88d31fe293d4
-    on_success: change
-    on_failure: always
-    on_start: never
+before_cache: find "$HOME/.ivy2/cache" -name "ivydata-*.properties" -delete
