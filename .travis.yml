@@ -15,7 +15,7 @@ install: jabba install "adopt@~1.$TRAVIS_JDK.0-0" && jabba use "$_" && java -Xmx
 
 script:
     # Test with the defaults
-  - sbt new file://$PWD --name=hello && pushd hello && sbt test && popd || travis_terminate 1
+  - sbt new file://$PWD '--name=Hello World' && pushd hello-world && sbt test && popd || travis_terminate 1
     # Test with custom name/organization to ensure templating is done correctly
   - sbt new file://$PWD --name=smello --organization=org.eggsample && pushd smello && sbt test && popd || travis_terminate 1
 
