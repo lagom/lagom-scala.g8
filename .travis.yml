@@ -1,6 +1,5 @@
 language: scala
-sudo: false
-jdk: oraclejdk8
+jdk: openjdk8
 env:
   matrix:
     # Test with the defaults
@@ -11,7 +10,7 @@ script: eval "$SCRIPT"
 cache:
   directories:
     - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/scala*
+    - $HOME/.sbt
 before_cache:
   # Delete all ivydata files since ivy touches them on each build
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
