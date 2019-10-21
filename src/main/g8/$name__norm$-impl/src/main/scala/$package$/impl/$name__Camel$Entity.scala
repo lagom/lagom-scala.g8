@@ -1,17 +1,27 @@
 package $package$.impl
 
+import play.api.libs.json.Json
+import play.api.libs.json.Format
 import java.time.LocalDateTime
 
-import akka.Done
-import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
-import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
-import play.api.libs.json.{Format, Json}
+import akka.actor.typed.ActorRef
+import akka.actor.typed.Behavior
+import akka.cluster.sharding.typed.scaladsl._
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.Effect
+import akka.persistence.typed.scaladsl.EventSourcedBehavior
+import akka.persistence.typed.scaladsl.ReplyEffect
+import com.lightbend.lagom.scaladsl.persistence.AggregateEvent
+import com.lightbend.lagom.scaladsl.persistence.AggregateEventTag
+import com.lightbend.lagom.scaladsl.persistence.AkkaTaggerAdapter
+import com.lightbend.lagom.scaladsl.playjson.JsonSerializer
+import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
+import play.api.libs.json._
 
 import scala.collection.immutable.Seq
 
 /**
-  * This is an event sourced entity. It has a state, [[$name;format="Camel"$State]], which
+  * This provides an event sourced behavior. It has a state, [[$name;format="Camel"$State]], which
   * stores what the greeting should be (eg, "Hello").
   *
   * Event sourced entities are interacted with by sending them commands. This
@@ -29,61 +39,75 @@ import scala.collection.immutable.Seq
   * This entity defines one event, the [[GreetingMessageChanged]] event,
   * which is emitted when a [[UseGreetingMessage]] command is received.
   */
-class $name;format="Camel"$Entity extends PersistentEntity {
+object $name;format="Camel"$Behavior {
 
-  override type Command = $name;format="Camel"$Command[_]
-  override type Event = $name;format="Camel"$Event
-  override type State = $name;format="Camel"$State
+
+  def create(entityContext: EntityContext[$name;format="Camel"$Command]): Behavior[$name;format="Camel"$Command] = {
+    val persistenceId: PersistenceId = PersistenceId(entityContext.entityTypeKey.name, entityContext.entityId)
+
+    create(persistenceId)
+      .withTagger(
+        // Using Akka Persistence Typed in Lagom requires tagging your events
+        // in Lagom-compatible way so Lagom ReadSideProcessors and TopicProducers
+        // can locate and follow the event streams.
+        AkkaTaggerAdapter.fromLagom(entityContext, $name;format="Camel"$Event.Tag)
+      )
+
+  }
+  private[impl] def create(persistenceId: PersistenceId) = EventSourcedBehavior
+      .withEnforcedReplies[$name;format="Camel"$Command, $name;format="Camel"$Event, $name;format="Camel"$State](
+        persistenceId = persistenceId,
+        emptyState = $name;format="Camel"$State.initial,
+        commandHandler = (cart, cmd) => cart.applyCommand(cmd),
+        eventHandler = (cart, evt) => cart.applyEvent(evt)
+      )
+}
+
+/**
+  * The current state of the Persistent Entity.
+  */
+case class $name;format="Camel"$State(message: String, timestamp: String) {
+  def applyCommand(cmd: $name;format="Camel"$Command): ReplyEffect[$name;format="Camel"$Event, $name;format="Camel"$State] =
+    cmd match {
+      case x: Hello              => onHello(x)
+      case x: UseGreetingMessage => onGreetingMessageUpgrade(x)
+    }
+
+  def applyEvent(evt: $name;format="Camel"$Event): $name;format="Camel"$State =
+    evt match {
+      case GreetingMessageChanged(msg) => updateMessage(msg)
+    }
+  private def onHello(cmd: Hello): ReplyEffect[$name;format="Camel"$Event, $name;format="Camel"$State] =
+    Effect.reply(cmd.replyTo)(Greeting(s"\$message, \${cmd.name}!"))
+
+  private def onGreetingMessageUpgrade(
+    cmd: UseGreetingMessage
+  ): ReplyEffect[$name;format="Camel"$Event, $name;format="Camel"$State] =
+    Effect
+      .persist(GreetingMessageChanged(cmd.message))
+      .thenReply(cmd.replyTo) { _ =>
+        Accepted
+      }
+
+  private def updateMessage(newMessage: String) =
+    copy(newMessage, LocalDateTime.now().toString)
+}
+
+object $name;format="Camel"$State {
 
   /**
     * The initial state. This is used if there is no snapshotted state to be found.
     */
-  override def initialState: $name;format="Camel"$State = $name;format="Camel"$State("Hello", LocalDateTime.now.toString)
+  def initial: $name;format="Camel"$State = $name;format="Camel"$State("Hello", LocalDateTime.now.toString)
 
   /**
-    * An entity can define different behaviours for different states, so the behaviour
-    * is a function of the current state to a set of actions.
+    * The Event Sourced Behavior instances run on sharded actors inside the Akka Cluster.
+    * When sharding actors and distributing them across the cluster, each entity is
+    * namespaced under a typekey that specifies a name and also the type of the commands
+    * that sharded actor can receive.
     */
-  override def behavior: Behavior = {
-    case $name;format="Camel"$State(message, _) => Actions().onCommand[UseGreetingMessage, Done] {
+  val typeKey = EntityTypeKey[$name;format="Camel"$Command]("$name;format="Camel"$StateEntity")
 
-      // Command handler for the UseGreetingMessage command
-      case (UseGreetingMessage(newMessage), ctx, state) =>
-        // In response to this command, we want to first persist it as a
-        // GreetingMessageChanged event
-        ctx.thenPersist(
-          GreetingMessageChanged(newMessage)
-        ) { _ =>
-          // Then once the event is successfully persisted, we respond with done.
-          ctx.reply(Done)
-        }
-
-    }.onReadOnlyCommand[Hello, String] {
-
-      // Command handler for the Hello command
-      case (Hello(name), ctx, state) =>
-        // Reply with a message built from the current message, and the name of
-        // the person we're meant to say hello to.
-        ctx.reply(s"\$message, \$name!")
-
-    }.onEvent {
-
-      // Event handler for the GreetingMessageChanged event
-      case (GreetingMessageChanged(newMessage), state) =>
-        // We simply update the current state to use the greeting message from
-        // the event.
-        $name;format="Camel"$State(newMessage, LocalDateTime.now().toString)
-
-    }
-  }
-}
-
-/**
-  * The current state held by the persistent entity.
-  */
-case class $name;format="Camel"$State(message: String, timestamp: String)
-
-object $name;format="Camel"$State {
   /**
     * Format for the hello state.
     *
@@ -124,31 +148,26 @@ object GreetingMessageChanged {
 }
 
 /**
+  * This is a marker trait for commands.
+  * We will serialize them using Akka's Jackson support that is able to deal with the replyTo field.
+  * (see application.conf)
+  */
+trait $name;format="Camel"$CommandSerializable
+
+/**
   * This interface defines all the commands that the $name;format="Camel"$Entity supports.
   */
-sealed trait $name;format="Camel"$Command[R] extends ReplyType[R]
+sealed trait $name;format="Camel"$Command
+    extends $name;format="Camel"$CommandSerializable
 
 /**
   * A command to switch the greeting message.
   *
-  * It has a reply type of [[Done]], which is sent back to the caller
+  * It has a reply type of [[Confirmation]], which is sent back to the caller
   * when all the events emitted by this command are successfully persisted.
   */
-case class UseGreetingMessage(message: String) extends $name;format="Camel"$Command[Done]
-
-object UseGreetingMessage {
-
-  /**
-    * Format for the use greeting message command.
-    *
-    * Persistent entities get sharded across the cluster. This means commands
-    * may be sent over the network to the node where the entity lives if the
-    * entity is not on the same node that the command was issued from. To do
-    * that, a JSON format needs to be declared so the command can be serialized
-    * and deserialized.
-    */
-  implicit val format: Format[UseGreetingMessage] = Json.format
-}
+case class UseGreetingMessage(message: String, replyTo: ActorRef[Confirmation])
+    extends $name;format="Camel"$Command
 
 /**
   * A command to say hello to someone using the current greeting message.
@@ -156,20 +175,68 @@ object UseGreetingMessage {
   * The reply type is String, and will contain the message to say to that
   * person.
   */
-case class Hello(name: String) extends $name;format="Camel"$Command[String]
+case class Hello(name: String, replyTo: ActorRef[Greeting])
+    extends $name;format="Camel"$Command
 
-object Hello {
+sealed trait $name;format="Camel"$Reply
 
-  /**
-    * Format for the hello command.
-    *
-    * Persistent entities get sharded across the cluster. This means commands
-    * may be sent over the network to the node where the entity lives if the
-    * entity is not on the same node that the command was issued from. To do
-    * that, a JSON format needs to be declared so the command can be serialized
-    * and deserialized.
-    */
-  implicit val format: Format[Hello] = Json.format
+object $name;format="Camel"$Reply {
+  implicit val format: Format[$name;format="Camel"$Reply] =
+    new Format[$name;format="Camel"$Reply] {
+
+      override def reads(json: JsValue): JsResult[$name;format="Camel"$Reply] = {
+        if ((json \ "state").isDefined)
+          Json.fromJson[Greeting](json)
+        else
+          Json.fromJson[Confirmation](json)
+      }
+
+      override def writes(o: $name;format="Camel"$Reply): JsValue = {
+        o match {
+          case conf: Confirmation => Json.toJson(conf)
+          case state: Greeting    => Json.toJson(state)
+        }
+      }
+    }
+}
+
+final case class Greeting(message: String) extends $name;format="Camel"$Reply
+
+object Greeting {
+  implicit val format: Format[Greeting] = Json.format
+}
+
+sealed trait Confirmation extends $name;format="Camel"$Reply
+
+case object Confirmation {
+  implicit val format: Format[Confirmation] = new Format[Confirmation] {
+    override def reads(json: JsValue): JsResult[Confirmation] = {
+      if ((json \ "reason").isDefined)
+        Json.fromJson[Rejected](json)
+      else
+        Json.fromJson[Accepted](json)
+    }
+
+    override def writes(o: Confirmation): JsValue = {
+      o match {
+        case acc: Accepted => Json.toJson(acc)
+        case rej: Rejected => Json.toJson(rej)
+      }
+    }
+  }
+}
+
+sealed trait Accepted extends Confirmation
+
+case object Accepted extends Accepted {
+  implicit val format: Format[Accepted] =
+    Format(Reads(_ => JsSuccess(Accepted)), Writes(_ => Json.obj()))
+}
+
+case class Rejected(reason: String) extends Confirmation
+
+object Rejected {
+  implicit val format: Format[Rejected] = Json.format
 }
 
 /**
@@ -183,9 +250,14 @@ object Hello {
   */
 object $name;format="Camel"$SerializerRegistry extends JsonSerializerRegistry {
   override def serializers: Seq[JsonSerializer[_]] = Seq(
-    JsonSerializer[UseGreetingMessage],
-    JsonSerializer[Hello],
+    // state and events can use play-json, but commands should use jackson because of ActorRef[T] (see application.conf)
     JsonSerializer[GreetingMessageChanged],
-    JsonSerializer[$name;format="Camel"$State]
+    JsonSerializer[$name;format="Camel"$State],
+    // the replies use play-json as well
+    JsonSerializer[$name;format="Camel"$Reply],
+    JsonSerializer[Greeting],
+    JsonSerializer[Confirmation],
+    JsonSerializer[Accepted],
+    JsonSerializer[Rejected]
   )
 }

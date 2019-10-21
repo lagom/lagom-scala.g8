@@ -1,5 +1,6 @@
 package $package$.impl
 
+import akka.cluster.sharding.typed.scaladsl.Entity
 import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
@@ -36,6 +37,11 @@ abstract class $name;format="Camel"$Application(context: LagomApplicationContext
   // Register the JSON serializer registry
   override lazy val jsonSerializerRegistry: JsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
 
-  // Register the $name$ persistent entity
-  persistentEntityRegistry.register(wire[$name;format="Camel"$Entity])
+  // this is the equivalent in Akka Typed of Lagom's PersistentEntityRegistry.register
+  clusterSharding.init(
+    Entity($name;format="Camel"$State.typeKey)(
+      entityContext => $name;format="Camel"$Behavior.create(entityContext)
+    )
+  )
+
 }

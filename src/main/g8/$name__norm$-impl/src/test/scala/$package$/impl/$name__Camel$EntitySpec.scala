@@ -1,38 +1,37 @@
 package $package$.impl
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
-import com.lightbend.lagom.scaladsl.testkit.PersistentEntityTestDriver
-import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import java.util.UUID
 
-class $name;format="Camel"$EntitySpec extends WordSpec with Matchers with BeforeAndAfterAll {
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import akka.persistence.typed.PersistenceId
+import org.scalatest.Matchers
+import org.scalatest.WordSpecLike
 
-  private val system = ActorSystem("$name;format="Camel"$EntitySpec",
-    JsonSerializerRegistry.actorSystemSetupFor($name;format="Camel"$SerializerRegistry))
-
-  override protected def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
-  }
-
-  private def withTestDriver(block: PersistentEntityTestDriver[$name;format="Camel"$Command[_], $name;format="Camel"$Event, $name;format="Camel"$State] => Unit): Unit = {
-    val driver = new PersistentEntityTestDriver(system, new $name;format="Camel"$Entity, "$name;format="norm"$-1")
-    block(driver)
-    driver.getAllIssues should have size 0
-  }
+class $name;format="Camel"$EntitySpec extends ScalaTestWithActorTestKit(s"""
+      akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
+      akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+      akka.persistence.snapshot-store.local.dir = "target/snapshot-\${UUID.randomUUID().toString}"
+    """) with WordSpecLike with Matchers {
 
   "$name$ entity" should {
 
-    "say hello by default" in withTestDriver { driver =>
-      val outcome = driver.run(Hello("Alice"))
-      outcome.replies should contain only "Hello, Alice!"
+    "say hello by default" in {
+      val probe = createTestProbe[Greeting]()
+      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-id")))
+      ref ! Hello("Alice", probe.ref)
+      probe.expectMessage(Greeting("Hello, Alice!"))
     }
 
-    "allow updating the greeting message" in withTestDriver { driver =>
-      val outcome1 = driver.run(UseGreetingMessage("Hi"))
-      outcome1.events should contain only GreetingMessageChanged("Hi")
-      val outcome2 = driver.run(Hello("Alice"))
-      outcome2.replies should contain only "Hi, Alice!"
+    "allow updating the greeting message" in  {
+      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-id")))
+
+      val probe1 = createTestProbe[Confirmation]()
+      ref ! UseGreetingMessage("Hi", probe1.ref)
+      probe1.expectMessage(Accepted)
+
+      val probe2 = createTestProbe[Greeting]()
+      ref ! Hello("Alice", probe2.ref)
+      probe2.expectMessage(Greeting("Hi, Alice!"))
     }
 
   }
