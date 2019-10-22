@@ -25,23 +25,25 @@ import scala.collection.immutable.Seq
   * stores what the greeting should be (eg, "Hello").
   *
   * Event sourced entities are interacted with by sending them commands. This
-  * entity supports two commands, a [[UseGreetingMessage]] command, which is
+  * aggregate supports two commands, a [[UseGreetingMessage]] command, which is
   * used to change the greeting, and a [[Hello]] command, which is a read
   * only command which returns a greeting to the name specified by the command.
   *
-  * Commands get translated to events, and it's the events that get persisted by
-  * the entity. Each event will have an event handler registered for it, and an
+  * Commands get translated to events, and it's the events that get persisted.
+  * Each event will have an event handler registered for it, and an
   * event handler simply applies an event to the current state. This will be done
-  * when the event is first created, and it will also be done when the entity is
+  * when the event is first created, and it will also be done when the aggregate is
   * loaded from the database - each event will be replayed to recreate the state
-  * of the entity.
+  * of the aggregate.
   *
-  * This entity defines one event, the [[GreetingMessageChanged]] event,
+  * This aggregate defines one event, the [[GreetingMessageChanged]] event,
   * which is emitted when a [[UseGreetingMessage]] command is received.
   */
 object $name;format="Camel"$Behavior {
 
-
+  /**
+    * Given a sharding [[EntityContext]] this function produces an Akka [[Behavior]] for the aggregate.
+    */ 
   def create(entityContext: EntityContext[$name;format="Camel"$Command]): Behavior[$name;format="Camel"$Command] = {
     val persistenceId: PersistenceId = PersistenceId(entityContext.entityTypeKey.name, entityContext.entityId)
 
@@ -54,6 +56,9 @@ object $name;format="Camel"$Behavior {
       )
 
   }
+  /*
+   * This method is extracted to write unit tests that are completely independendant to Akka Cluster.
+   */
   private[impl] def create(persistenceId: PersistenceId) = EventSourcedBehavior
       .withEnforcedReplies[$name;format="Camel"$Command, $name;format="Camel"$Event, $name;format="Camel"$State](
         persistenceId = persistenceId,
@@ -64,7 +69,7 @@ object $name;format="Camel"$Behavior {
 }
 
 /**
-  * The current state of the Persistent Entity.
+  * The current state of the Aggregate.
   */
 case class $name;format="Camel"$State(message: String, timestamp: String) {
   def applyCommand(cmd: $name;format="Camel"$Command): ReplyEffect[$name;format="Camel"$Event, $name;format="Camel"$State] =
@@ -101,18 +106,18 @@ object $name;format="Camel"$State {
   def initial: $name;format="Camel"$State = $name;format="Camel"$State("Hello", LocalDateTime.now.toString)
 
   /**
-    * The Event Sourced Behavior instances run on sharded actors inside the Akka Cluster.
-    * When sharding actors and distributing them across the cluster, each entity is
+    * The [[EventSourcedBehavior]] instances (aka Aggregates) run on sharded actors inside the Akka Cluster.
+    * When sharding actors and distributing them across the cluster, each aggregate is
     * namespaced under a typekey that specifies a name and also the type of the commands
     * that sharded actor can receive.
     */
-  val typeKey = EntityTypeKey[$name;format="Camel"$Command]("$name;format="Camel"$StateEntity")
+  val typeKey = EntityTypeKey[$name;format="Camel"$Command]("$name;format="Camel"$Aggregate")
 
   /**
     * Format for the hello state.
     *
     * Persisted entities get snapshotted every configured number of events. This
-    * means the state gets stored to the database, so that when the entity gets
+    * means the state gets stored to the database, so that when the aggregate gets
     * loaded, you don't need to replay all the events, just the ones since the
     * snapshot. Hence, a JSON format needs to be declared so that it can be
     * serialized and deserialized when storing to and from the database.
@@ -121,7 +126,7 @@ object $name;format="Camel"$State {
 }
 
 /**
-  * This interface defines all the events that the $name;format="Camel"$Entity supports.
+  * This interface defines all the events that the $name;format="Camel"$Aggregate supports.
   */
 sealed trait $name;format="Camel"$Event extends AggregateEvent[$name;format="Camel"$Event] {
   def aggregateTag: AggregateEventTag[$name;format="Camel"$Event] = $name;format="Camel"$Event.Tag
@@ -155,7 +160,7 @@ object GreetingMessageChanged {
 trait $name;format="Camel"$CommandSerializable
 
 /**
-  * This interface defines all the commands that the $name;format="Camel"$Entity supports.
+  * This interface defines all the commands that the $name;format="Camel"$Aggregate supports.
   */
 sealed trait $name;format="Camel"$Command
     extends $name;format="Camel"$CommandSerializable
@@ -178,35 +183,13 @@ case class UseGreetingMessage(message: String, replyTo: ActorRef[Confirmation])
 case class Hello(name: String, replyTo: ActorRef[Greeting])
     extends $name;format="Camel"$Command
 
-sealed trait $name;format="Camel"$Reply
-
-object $name;format="Camel"$Reply {
-  implicit val format: Format[$name;format="Camel"$Reply] =
-    new Format[$name;format="Camel"$Reply] {
-
-      override def reads(json: JsValue): JsResult[$name;format="Camel"$Reply] = {
-        if ((json \ "state").isDefined)
-          Json.fromJson[Greeting](json)
-        else
-          Json.fromJson[Confirmation](json)
-      }
-
-      override def writes(o: $name;format="Camel"$Reply): JsValue = {
-        o match {
-          case conf: Confirmation => Json.toJson(conf)
-          case state: Greeting    => Json.toJson(state)
-        }
-      }
-    }
-}
-
-final case class Greeting(message: String) extends $name;format="Camel"$Reply
+final case class Greeting(message: String)
 
 object Greeting {
   implicit val format: Format[Greeting] = Json.format
 }
 
-sealed trait Confirmation extends $name;format="Camel"$Reply
+sealed trait Confirmation
 
 case object Confirmation {
   implicit val format: Format[Confirmation] = new Format[Confirmation] {
@@ -254,7 +237,6 @@ object $name;format="Camel"$SerializerRegistry extends JsonSerializerRegistry {
     JsonSerializer[GreetingMessageChanged],
     JsonSerializer[$name;format="Camel"$State],
     // the replies use play-json as well
-    JsonSerializer[$name;format="Camel"$Reply],
     JsonSerializer[Greeting],
     JsonSerializer[Confirmation],
     JsonSerializer[Accepted],

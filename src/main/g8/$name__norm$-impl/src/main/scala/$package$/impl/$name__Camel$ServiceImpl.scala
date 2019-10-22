@@ -36,20 +36,20 @@ class $name;format="Camel"$ServiceImpl(
 
   override def hello(id: String): ServiceCall[NotUsed, String] = ServiceCall {
     _ =>
-      // Look up the smello entity for the given ID.
+      // Look up the sharded entity (aka the aggregate instance) for the given ID.
       val ref = entityRef(id)
 
-      // Ask the entity the Hello command.
+      // Ask the aggregate instance the Hello command.
       ref
         .ask[Greeting](replyTo => Hello(id, replyTo))
         .map(greeting => greeting.message)
   }
 
   override def useGreeting(id: String) = ServiceCall { request =>
-    // Look up the smello entity for the given ID.
+    // Look up the sharded entity (aka the aggregate instance) for the given ID.
     val ref = entityRef(id)
 
-    // Tell the entity to use the greeting message specified.
+    // Tell the aggregate to use the greeting message specified.
     ref
       .ask[Confirmation](
         replyTo => UseGreetingMessage(request.message, replyTo)

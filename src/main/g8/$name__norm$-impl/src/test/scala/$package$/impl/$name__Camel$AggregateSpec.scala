@@ -7,13 +7,13 @@ import akka.persistence.typed.PersistenceId
 import org.scalatest.Matchers
 import org.scalatest.WordSpecLike
 
-class $name;format="Camel"$EntitySpec extends ScalaTestWithActorTestKit(s"""
+class $name;format="Camel"$AggregateSpec extends ScalaTestWithActorTestKit(s"""
       akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
       akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
       akka.persistence.snapshot-store.local.dir = "target/snapshot-\${UUID.randomUUID().toString}"
     """) with WordSpecLike with Matchers {
 
-  "$name$ entity" should {
+  "$name$ aggregate" should {
 
     "say hello by default" in {
       val probe = createTestProbe[Greeting]()

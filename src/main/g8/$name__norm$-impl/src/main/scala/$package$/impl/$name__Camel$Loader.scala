@@ -37,7 +37,8 @@ abstract class $name;format="Camel"$Application(context: LagomApplicationContext
   // Register the JSON serializer registry
   override lazy val jsonSerializerRegistry: JsonSerializerRegistry = $name;format="Camel"$SerializerRegistry
 
-  // this is the equivalent in Akka Typed of Lagom's PersistentEntityRegistry.register
+  // Initialize the sharding of the Aggregate. The following starts the aggregate Behavior under
+  // a given sharding entity typeKey.
   clusterSharding.init(
     Entity($name;format="Camel"$State.typeKey)(
       entityContext => $name;format="Camel"$Behavior.create(entityContext)
