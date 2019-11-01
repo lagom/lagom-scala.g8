@@ -17,13 +17,13 @@ class $name;format="Camel"$AggregateSpec extends ScalaTestWithActorTestKit(s"""
 
     "say hello by default" in {
       val probe = createTestProbe[Greeting]()
-      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-id")))
+      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-type-hint", "fake-id")))
       ref ! Hello("Alice", probe.ref)
       probe.expectMessage(Greeting("Hello, Alice!"))
     }
 
     "allow updating the greeting message" in  {
-      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-id")))
+      val ref = spawn($name;format="Camel"$Behavior.create(PersistenceId("fake-type-hint", "fake-id")))
 
       val probe1 = createTestProbe[Confirmation]()
       ref ! UseGreetingMessage("Hi", probe1.ref)
