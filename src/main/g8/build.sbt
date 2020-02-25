@@ -5,7 +5,7 @@ version in ThisBuild := "$version$"
 scalaVersion in ThisBuild := "2.13.0"
 
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided"
-val scalaTest = "org.scalatest" %% "scalatest" % "3.0.8" % Test
+val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
 
 lazy val `$name;format="norm"$` = (project in file("."))
   .aggregate(`$name;format="norm"$-api`, `$name;format="norm"$-impl`, `$name;format="normalize"$-stream-api`, `$name;format="normalize"$-stream-impl`)
