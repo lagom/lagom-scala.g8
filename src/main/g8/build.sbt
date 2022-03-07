@@ -1,8 +1,13 @@
-organization in ThisBuild := "$organization$"
-version in ThisBuild := "$version$"
+ThisBuild / organization := "$organization$"
+ThisBuild / version := "$version$"
 
 // the Scala version that will be used for cross-compiled libraries
-scalaVersion in ThisBuild := "2.13.0"
+ThisBuild / scalaVersion := "2.13.8"
+
+// Workaround for scala-java8-compat issue affecting Lagom dev-mode
+// https://github.com/lagom/lagom/issues/3344
+ThisBuild / libraryDependencySchemes +=
+  "org.scala-lang.modules" %% "scala-java8-compat" % VersionScheme.Always
 
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
